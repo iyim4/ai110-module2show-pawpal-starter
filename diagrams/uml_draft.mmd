@@ -1,0 +1,31 @@
+classDiagram
+    class Task {
+        -name: str
+        -description: str
+        -duration: int
+        -completed: bool
+        +mark_complete()
+    }
+
+    class Pet {
+        -name: str
+        -breed: str
+        -tasks: list[Task]
+        +add_task(name: str, description: str, duration: int)
+    }
+
+    class Owner {
+        -name: str
+        -pets: list[Pet]
+        +add_pet(name: str, breed: str)
+    }
+
+    class Scheduler {
+        +create_schedule(tasks: list[Task]) list[Task]
+        +create_schedule_for_owner(owner: Owner) list[Task]
+    }
+
+    Pet --> Task: contains many
+    Owner --> Pet: contains many
+    Scheduler --> Owner: schedules for
+    Scheduler --> Task: organizes many

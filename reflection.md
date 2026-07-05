@@ -2,10 +2,19 @@
 
 ## 1. System Design
 
+The three main tasks a user should be able to do is:
+- add a pet they own
+- schedule a task related to that pet
+- view the full schedule of tasks for that pet or all the pets 
+
 **a. Initial design**
 
 - Briefly describe your initial UML design.
 - What classes did you include, and what responsibilities did you assign to each?
+- owner class contains a list of pets and a scheduler. scheduler is located in owner to communicate preferences. owner is reponsible for asking the scheduler to create a schedule with its pets
+- pet contains pet data and a list of tasks
+- task contains task data
+- scheduler receives requests from owner with preferences and pet list(s) to create or merge pet schedules
 
 **b. Design changes**
 
