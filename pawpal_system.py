@@ -15,13 +15,25 @@ Classes:
 
 from dataclasses import dataclass, field
 from typing import List
+from enum import Enum
+from datetime import time
 
+class Priority(Enum):
+    LOW = 1
+    MEDIUM = 2
+    HIGH = 3
+
+class TimeIncrement(Enum):
+    HOUR = 1
+    QUARTER_HOUR = 2
+    HALF_HOUR = 3
 
 @dataclass
 class Task:
-    name: str
     description: str
     duration: int
+    due_time: time
+    priority: Priority = Priority.LOW
     completed: bool = False
 
     def mark_complete(self) -> None:
@@ -34,21 +46,27 @@ class Pet:
     breed: str
     tasks: List[Task] = field(default_factory=list)
 
-    def add_task(self, name: str, description: str, duration: int) -> None:
+    def add_task(self, description: str, due_time: time, duration: int, priority: Priority) -> None:
         pass
 
-    def get_tasks(self) -> List[Task]:
-        return []
-
+    def print_schedule(self) -> None:
+        pass
 
 class Owner:
-    def __init__(self, name: str) -> None:
+    def __init__(self, name: str, start_time: time = time(hour=8, minute=00), time_increment: TimeIncrement = TimeIncrement.HOUR) -> None:
         self.name = name
         self.pets: List[Pet] = []
+        self.start_time: time = start_time
+        self.time_increment: TimeIncrement = time_increment
 
     def add_pet(self, name: str, breed: str) -> None:
         pass
 
+    def print_schedule_for_pet(self, name: str) -> None:
+        pass
+
+    def print_schedule_for_all_pets(self) -> None:
+        pass
 
 class Scheduler:
     def create_schedule(self, tasks: List[Task]) -> List[Task]:

@@ -1,8 +1,23 @@
 classDiagram
+    class Priority {
+        <<enumeration>>
+        LOW
+        MEDIUM
+        HIGH
+    }
+
+    class TimeIncrement {
+        <<enumeration>>
+        HOUR
+        QUARTER_HOUR
+        HALF_HOUR
+    }
+
     class Task {
-        -name: str
         -description: str
         -duration: int
+        -due_time: time
+        -priority: Priority
         -completed: bool
         +mark_complete()
     }
@@ -11,13 +26,18 @@ classDiagram
         -name: str
         -breed: str
         -tasks: list[Task]
-        +add_task(name: str, description: str, duration: int)
+        +add_task(description: str, due_time: time, duration: int, priority: Priority)
+        +print_schedule()
     }
 
     class Owner {
         -name: str
         -pets: list[Pet]
+        -start_time: time
+        -time_increment: TimeIncrement
         +add_pet(name: str, breed: str)
+        +print_schedule_for_pet(name: str)
+        +print_schedule_for_all_pets()
     }
 
     class Scheduler {
@@ -27,5 +47,7 @@ classDiagram
 
     Pet --> Task: contains many
     Owner --> Pet: contains many
+    Task --> Priority: uses
+    Owner --> TimeIncrement: uses
     Scheduler --> Owner: schedules for
     Scheduler --> Task: organizes many
