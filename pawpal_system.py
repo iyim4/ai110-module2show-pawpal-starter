@@ -7,10 +7,13 @@ care activities for their pets. Owners can create pets, assign tasks to them,
 and use the Scheduler to organize tasks by priority or other criteria.
 
 Classes:
-    Task: A single pet care activity with a name, description, and duration.
+    Task: A single pet care activity with description, due_time, and other data.
     Pet: A pet with a name, breed, and associated tasks.
     Owner: An owner who manages one or more pets.
     Scheduler: Utility class for organizing tasks across all pets.
+    Priority: enum representing task importance
+    TimeIncrement: enum representing Task scheduling blocks
+    TimeFrequency: enum representing Task frequency
 """
 
 from dataclasses import dataclass, field
@@ -46,7 +49,8 @@ class Task:
     completed: bool = False
 
     def mark_complete(self) -> None:
-        pass
+        """Mark this task as completed."""
+        self.completed = True
 
 
 @dataclass
@@ -63,10 +67,19 @@ class Pet:
         frequency: TimeFrequency = TimeFrequency.DAILY,
         priority: Priority = Priority.LOW,
     ) -> None:
-        pass
+        """Create and add a task to this pet's task list."""
+        task = Task(description, duration, due_time, frequency, priority)
+        self.tasks.append(task)
 
     def print_schedule(self) -> None:
-        pass
+        """Print this pet's daily task schedule."""
+        print(f"\nDaily plan for {self.name} ({self.breed}):")
+        for task in self.tasks:
+            time_str = task.due_time.strftime("%H:%M")
+            priority_str = task.priority.name.lower()
+            print(
+                f"  {time_str} — {task.description} ({task.duration} min) [priority: {priority_str}]"
+            )
 
 
 class Owner:
@@ -76,27 +89,82 @@ class Owner:
         start_time: time = time(hour=8, minute=00),
         time_increment: TimeIncrement = TimeIncrement.HOUR,
     ) -> None:
+        """Initialize an owner with name, start time, and time increment preferences."""
         self.name = name
         self.pets: List[Pet] = []
         self.start_time: time = start_time
         self.time_increment: TimeIncrement = time_increment
 
     def add_pet(self, name: str, breed: str) -> None:
-        pass
+        """Create and add a pet to this owner's pet list."""
+        pet = Pet(name, breed)
+        self.pets.append(pet)
+
+    def add_task_for_pet(
+        self,
+        name: str,
+        description: str,
+        duration: int,
+        due_time: time,
+        frequency: TimeFrequency = TimeFrequency.DAILY,
+        priority: Priority = Priority.LOW,
+    ) -> bool:
+        """Add a task to the pet with the given name; return True if found, False otherwise."""
+        for pet in self.pets:
+            if pet.name == name:
+                pet.add_task(
+                    description=description,
+                    duration=duration,
+                    due_time=due_time,
+                    frequency=frequency,
+                    priority=priority,
+                )
+                return True
+        return False
 
     def get_tasks_for_pet(self, name: str) -> List[Task]:
+        """Return the task list for the pet with the given name, or an empty list if not found."""
+        for pet in self.pets:
+            if pet.name == name:
+                return pet.tasks
         return []
 
     def print_schedule_for_pet(self, name: str) -> None:
-        pass
+        """Print the daily schedule for a specific pet by name."""
+        pet = None
+        for p in self.pets:
+            if p.name == name:
+                pet = p
+                break
+
+        if pet is None:
+            print(f"Pet '{name}' not found.")
+            return
+
+        pet.print_schedule()
 
     def print_schedule_for_all_pets(self) -> None:
-        pass
+        """Print the daily schedule for all owned pets."""
+        if not self.pets:
+            print("No pets found.")
+            return
+        for pet in self.pets:
+            pet.print_schedule()
 
 
 class Scheduler:
     def create_schedule(self, tasks: List[Task]) -> List[Task]:
-        return []
+        """Return tasks sorted by priority (high to low)."""
+        # sort by high to low priority
+        return sorted(tasks, key=lambda task: task.priority.value, reverse=True)
 
     def create_schedule_for_owner(self, owner: Owner) -> List[Task]:
+        """Create an ordered schedule for all tasks across an owner's pets (not yet implemented)."""
+        # all_tasks = []
+        # for pet in owner.pets:
+        #     all_tasks.extend(pet.tasks)
+        # return self.create_schedule(all_tasks)
+
+        # No, this won't work since we don't know what pet's task to do. must attach pet name to each task.
+
         return []
