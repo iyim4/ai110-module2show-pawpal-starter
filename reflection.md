@@ -9,17 +9,22 @@ The three main tasks a user should be able to do is:
 
 **a. Initial design**
 
-- Briefly describe your initial UML design.
-- What classes did you include, and what responsibilities did you assign to each?
-- owner class contains a list of pets and a scheduler. scheduler is located in owner to communicate preferences. owner is reponsible for asking the scheduler to create a schedule with its pets
-- pet contains pet data and a list of tasks
-- task contains task data
-- scheduler receives requests from owner with preferences and pet list(s) to create or merge pet schedules
+- UML Design: The Owner contains many pets, and each pet contains a list of tasks. The scheduler can create a schedule given a list of tasks, and merge schedules for all the pets of one owner.
+- owner, pet, and task contain data. scheduler is stateless
+- scheduler combines pet schedules given an owner's preferences
+- Classes:
+    - Task: A single pet care activity with a name, description, and duration.
+    - Pet: A pet with a name, breed, and associated tasks.
+    - Owner: An owner who manages one or more pets.
+    - Scheduler: Utility class for organizing tasks across all pets.
 
 **b. Design changes**
 
-- Did your design change during implementation?
-- If yes, describe at least one change and why you made it.
+- After reviewing the rubic, I added due_time to the Task class and moved time-related scheduling responsibilities from Owner to Scheduler. 
+- I also added three utility enum classes to communicate timing-related settings
+    - Priority: enum representing task importance
+    - TimeIncrement: enum representing Task scheduling blocks
+    - TimeFrequency: enum representing Task frequency
 
 ---
 
