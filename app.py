@@ -179,14 +179,33 @@ with col2:
     else:
         pet_name_sch = None
 
-if st.button("Generate schedule"):
-    if pet_name_sch:
-        if pet_name_sch == "All Pets":
-            schedule = owner.generate_str_schedule_for_all_pets()
-        else:
-            # Extract just the name (before the parenthesis)
-            pet_name = pet_name_sch.split(" (")[0]
-            schedule = owner.generate_str_schedule_for_pet(pet_name)
+col1, col2, col3 = st.columns(3)
+
+schedule = None
+
+if pet_name_sch:
+    with col1:
+        if st.button("Generate schedule"):
+            if pet_name_sch == "All Pets":
+                schedule = owner.generate_str_schedule_for_all_pets()
+            else:
+                pet_name = pet_name_sch.split(" (")[0]
+                schedule = owner.generate_str_schedule_for_pet(pet_name)
+
+    # Only show sort and filter buttons for single pet
+    if pet_name_sch != "All Pets":
+        with col2:
+            if st.button("Sort by time"):
+                pet_name = pet_name_sch.split(" (")[0]
+                schedule = owner.get_sorted_schedule_for_pet(pet_name)
+
+        with col3:
+            if st.button("Filter out completed"):
+                pet_name = pet_name_sch.split(" (")[0]
+                schedule = owner.get_incomplete_schedule_for_pet(pet_name)
+
+    # Display schedule if one was generated
+    if schedule:
         st.markdown(schedule)
-    else:
-        st.error("Please add a pet first.")
+else:
+    st.error("Please add a pet first.")

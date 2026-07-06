@@ -195,7 +195,6 @@ class Owner:
         """Return the daily schedule for a specific pet by name as a string."""
         pet = None
         for p in self.pets:
-            print("checking pet", p.name)
             if p.name == name:
                 pet = p
                 break
@@ -204,6 +203,49 @@ class Owner:
             return f"Pet '{name}' not found."
 
         return pet.get_str_schedule()
+
+    def get_sorted_schedule_for_pet(self, name: str) -> str:
+        """Return the daily schedule for a specific pet sorted by scheduled time."""
+        pet = None
+        for p in self.pets:
+            if p.name == name:
+                pet = p
+                break
+
+        if pet is None:
+            return f"Pet '{name}' not found."
+
+        Scheduler.sort_by_time(pet)
+        return pet.get_str_schedule()
+
+    def get_incomplete_schedule_for_pet(self, name: str) -> str:
+        """Return only incomplete tasks for a specific pet as a schedule string."""
+        pet = None
+        for p in self.pets:
+            if p.name == name:
+                pet = p
+                break
+
+        if pet is None:
+            return f"Pet '{name}' not found."
+
+        incomplete_tasks = Scheduler.filter_out_completed(pet)
+        lines = [f"#### Active tasks for {pet.name} ({pet.species})"]
+        for task in incomplete_tasks:
+            time_str = (
+                task.scheduled_time.strftime("%H:%M")
+                if task.scheduled_time
+                else "unscheduled"
+            )
+            priority_str = task.priority.name.lower()
+            lines.append(
+                f"  - {time_str} — {task.description} ({task.duration} min) [priority: {priority_str}]"
+            )
+
+        if not incomplete_tasks:
+            lines.append("  (All tasks completed!)")
+
+        return "\n".join(lines)
 
     def generate_str_schedule_for_pet(self, name: str) -> str:
         """Generate and return the daily schedule for a specific pet by name."""
