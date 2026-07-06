@@ -8,7 +8,7 @@ and use the Scheduler to organize tasks by priority or other criteria.
 
 Classes:
     Task: A single pet care activity with description, due_time, and other data.
-    Pet: A pet with a name, breed, and associated tasks.
+    Pet: A pet with a name, species, and associated tasks.
     Owner: An owner who manages one or more pets.
     Scheduler: Utility class for organizing tasks across all pets.
     Priority: enum representing task importance
@@ -26,6 +26,16 @@ class Priority(Enum):
     LOW = auto()
     MEDIUM = auto()
     HIGH = auto()
+
+
+PRIORITY_STRINGS = {
+    # Priority.LOW: "Low",
+    # Priority.MEDIUM: "Medium",
+    # Priority.HIGH: "High",
+    "Low": Priority.LOW,
+    "Medium": Priority.MEDIUM,
+    "High": Priority.HIGH,
+}
 
 
 class TimeIncrement(Enum):
@@ -56,7 +66,7 @@ class Task:
 @dataclass
 class Pet:
     name: str
-    breed: str
+    species: str
     tasks: List[Task] = field(default_factory=list)
 
     def add_task(
@@ -73,7 +83,7 @@ class Pet:
 
     def print_schedule(self) -> None:
         """Print this pet's daily task schedule."""
-        print(f"\nDaily plan for {self.name} ({self.breed}):")
+        print(f"\nDaily plan for {self.name} ({self.species}):")
         for task in self.tasks:
             time_str = task.due_time.strftime("%H:%M")
             priority_str = task.priority.name.lower()
@@ -95,9 +105,9 @@ class Owner:
         self.start_time: time = start_time
         self.time_increment: TimeIncrement = time_increment
 
-    def add_pet(self, name: str, breed: str) -> None:
+    def add_pet(self, name: str, species: str) -> None:
         """Create and add a pet to this owner's pet list."""
-        pet = Pet(name, breed)
+        pet = Pet(name, species)
         self.pets.append(pet)
 
     def add_task_for_pet(
@@ -105,7 +115,7 @@ class Owner:
         name: str,
         description: str,
         duration: int,
-        due_time: time,
+        due_time: time = time(hour=23, minute=59),
         frequency: TimeFrequency = TimeFrequency.DAILY,
         priority: Priority = Priority.LOW,
     ) -> bool:

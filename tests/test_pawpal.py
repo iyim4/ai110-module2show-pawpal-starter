@@ -22,7 +22,7 @@ def test_task_completion():
 
 def test_add_tasks_to_pet():
     """Verify that adding a task to a Pet increases that pet's task count."""
-    pet = Pet(name="Buddy", breed="Golden Retriever")
+    pet = Pet(name="Buddy", species="Golden Retriever")
 
     # Initially, pet should have no tasks
     assert len(pet.tasks) == 0
