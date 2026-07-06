@@ -48,6 +48,11 @@ TIME_INCREMENT_STRINGS = {
     "Quarter Hourly": TimeIncrement.QUARTER_HOUR,
 }
 REVERSE_TIME_INCREMENT = {v: k for k, v in TIME_INCREMENT_STRINGS.items()}
+INCREMENT_MINUTES = {
+    TimeIncrement.QUARTER_HOUR.value: 15,
+    TimeIncrement.HALF_HOUR.value: 30,
+    TimeIncrement.HOUR.value: 60,
+}
 
 
 class Recurrence(Enum):
@@ -282,12 +287,7 @@ class Scheduler:
     @staticmethod
     def _round_up_to_increment(base_time: time, increment: TimeIncrement) -> time:
         """Round up a time to the next increment boundary."""
-        increment_minutes = {
-            TimeIncrement.QUARTER_HOUR: 15,
-            TimeIncrement.HALF_HOUR: 30,
-            TimeIncrement.HOUR: 60,
-        }
-        minutes = increment_minutes[increment]
+        minutes = INCREMENT_MINUTES[increment.value]
         total_minutes = base_time.hour * 60 + base_time.minute
         if total_minutes % minutes == 0:
             return base_time
