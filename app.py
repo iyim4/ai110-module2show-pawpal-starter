@@ -7,6 +7,7 @@ from pawpal_system import (
     PRIORITY_STRINGS,
     Scheduler,
     TIME_INCREMENT_STRINGS,
+    REVERSE_PRIORITY,
 )
 
 st.set_page_config(page_title="PawPal+", page_icon="🐾", layout="centered")
@@ -159,7 +160,73 @@ for pet in owner.pets:
             st.warning("error adding task!")
 
     if pet.tasks:
-        st.write(f"Current tasks: {pet.get_str_task_list()}")
+        task_data = [
+            {
+                "Complete": task.completed,
+                "Task": task.description,
+                "Duration (min)": task.duration,
+                "Priority": REVERSE_PRIORITY[task.priority.value],
+            }
+            for task in pet.tasks
+        ]
+        edited_df = st.data_editor(
+            task_data,
+            num_rows="dynamic",
+            hide_index=True,
+            column_config={
+                "Task": st.column_config.TextColumn(),
+                "Duration (min)": st.column_config.NumberColumn(
+                    min_value=1, max_value=240
+                ),
+                "Priority": st.column_config.SelectboxColumn(
+                    options=list(PRIORITY_STRINGS.keys())
+                ),
+                "Complete": st.column_config.CheckboxColumn(),
+            },
+            key=f"tasks_{pet.name}",
+        )
+
+        col1, col2 = st.columns([0.3, 0.7])
+        with col1:
+            if st.button("Save task changes", key=f"save_{pet.name}"):
+                # Validate task names are not empty
+                errors = []
+                for i, row in enumerate(edited_df):
+                    task_name = str(row.get("Task", "")).strip()
+                    if not task_name:
+                        errors.append(f"Row {i+1}: Task name cannot be empty")
+
+                if errors:
+                    st.error("\n".join(errors))
+                else:
+                    # Update existing tasks
+                    for i, task in enumerate(pet.tasks[: len(edited_df)]):
+                        row = edited_df[i]
+                        task.description = row["Task"]
+                        task.duration = int(row["Duration (min)"])
+                        task.priority = PRIORITY_STRINGS.get(
+                            row["Priority"], Priority.LOW
+                        )
+                        task.completed = row["Complete"]
+
+                    # Add new tasks (rows beyond original pet.tasks)
+                    for i in range(len(pet.tasks), len(edited_df)):
+                        row = edited_df[i]
+                        owner.add_task_for_pet(
+                            pet.name,
+                            row["Task"],
+                            int(row["Duration (min)"]),
+                            priority=PRIORITY_STRINGS.get(
+                                row["Priority"], Priority.LOW
+                            ),
+                        )
+
+                    # Remove deleted tasks (if dataframe is shorter)
+                    while len(pet.tasks) > len(edited_df):
+                        pet.tasks.pop()
+
+                    st.success("Tasks updated!")
+
     else:
         st.info(f"No tasks for {pet.name} yet. Add one above.")
 

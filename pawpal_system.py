@@ -33,7 +33,7 @@ PRIORITY_STRINGS = {
     "Medium": Priority.MEDIUM,
     "High": Priority.HIGH,
 }
-REVERSE_PRIORITY = {v: k for k, v in PRIORITY_STRINGS.items()}
+REVERSE_PRIORITY = {v.value: k for k, v in PRIORITY_STRINGS.items()}
 
 
 class TimeIncrement(Enum):
@@ -115,7 +115,7 @@ class Pet:
 
         strtasks = []
         for task in self.tasks:
-            pri = REVERSE_PRIORITY.get(task.priority, "Low")
+            pri = REVERSE_PRIORITY.get(task.priority.value, "Low")
             strtasks.append(
                 f"{task.description} ({task.duration} mins, {pri} priority)"
             )
