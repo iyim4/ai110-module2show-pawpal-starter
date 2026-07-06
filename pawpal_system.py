@@ -13,7 +13,7 @@ Classes:
     Scheduler: Utility class for organizing tasks across all pets.
     Priority: enum representing task importance
     TimeIncrement: enum representing Task scheduling blocks
-    TimeFrequency: enum representing Task frequency
+    Recurrence: enum representing Task recurrence
 """
 
 from dataclasses import dataclass, field
@@ -50,7 +50,7 @@ TIME_INCREMENT_STRINGS = {
 REVERSE_TIME_INCREMENT = {v: k for k, v in TIME_INCREMENT_STRINGS.items()}
 
 
-class TimeFrequency(Enum):
+class Recurrence(Enum):
     DAILY = auto()
     WEEKLY = auto()
 
@@ -60,7 +60,7 @@ class Task:
     description: str
     duration: int
     due_time: time
-    frequency: TimeFrequency = TimeFrequency.DAILY
+    recurrence: Recurrence = Recurrence.DAILY
     priority: Priority = Priority.LOW
     completed: bool = False
     scheduled_time: Optional[time] = None
@@ -81,11 +81,11 @@ class Pet:
         description: str,
         duration: int,
         due_time: time,
-        frequency: TimeFrequency = TimeFrequency.DAILY,
+        recurrence: Recurrence = Recurrence.DAILY,
         priority: Priority = Priority.LOW,
     ) -> None:
         """Create and add a task to this pet's task list."""
-        task = Task(description, duration, due_time, frequency, priority)
+        task = Task(description, duration, due_time, recurrence, priority)
         self.tasks.append(task)
 
     def get_str_schedule(self) -> str:
@@ -163,7 +163,7 @@ class Owner:
         description: str,
         duration: int,
         due_time: time = time(hour=23, minute=59),
-        frequency: TimeFrequency = TimeFrequency.DAILY,
+        recurrence: Recurrence = Recurrence.DAILY,
         priority: Priority = Priority.LOW,
     ) -> bool:
         """Add a task to the pet with the given name; return True if found, False otherwise."""
@@ -173,7 +173,7 @@ class Owner:
                     description=description,
                     duration=duration,
                     due_time=due_time,
-                    frequency=frequency,
+                    recurrence=recurrence,
                     priority=priority,
                 )
                 return True
@@ -313,7 +313,9 @@ class Scheduler:
     @staticmethod
     def sort_by_time(pet: Pet) -> None:
         """Sort pet's task list by scheduled_time, with unscheduled tasks last."""
-        pet.tasks.sort(key=lambda task: (task.scheduled_time is None, task.scheduled_time))
+        pet.tasks.sort(
+            key=lambda task: (task.scheduled_time is None, task.scheduled_time)
+        )
 
     @staticmethod
     def filter_out_completed(pet: Pet) -> List[Task]:

@@ -115,7 +115,7 @@ tests/test_pawpal.py::test_skipped_task_report_includes_details PASSED          
 | Task sorting | `Scheduler._task_sort_key()`, `Scheduler.sort_by_time()`, `Scheduler.create_schedule()` | Primary sort by priority (high to low); secondary sort by due_time (early to late) |
 | Filtering | `Scheduler.filter_out_completed()`, `Scheduler.create_schedule()` | Filter out completed tasks, skip tasks that can't fit before their due_time |
 | Conflict handling | `Scheduler.create_schedule()`, `Scheduler._format_skipped_tasks()` | Detects when tasks conflict with time slots; generates skipped task summary with reason |
-| Recurring tasks | `Task.frequency` property, `TimeFrequency` enum (DAILY/WEEKLY) | Frequency stored on each task |
+| Recurring tasks | `Task.frequency` property, `Recurrence` enum (DAILY/WEEKLY) | Frequency and recurrence stored on each task |
 
 ## 📸 Demo Walkthrough
 

@@ -1,10 +1,18 @@
-from pawpal_system import Pet, Task, Priority, TimeFrequency, Owner, Scheduler, TimeIncrement
+from pawpal_system import (
+    Pet,
+    Task,
+    Priority,
+    Recurrence,
+    Owner,
+    Scheduler,
+    TimeIncrement,
+)
 from datetime import time
-
 
 # ============================================================================
 # PART 1: CORE FUNCTIONALITY TESTS
 # ============================================================================
+
 
 def test_add_pet():
     """Test 1.1: Verify that an owner can successfully add pets."""
@@ -60,10 +68,18 @@ def test_add_tasks_to_multiple_pets():
     owner.add_pet("Biscuit", "Golden Retriever")
     owner.add_pet("Whiskers", "Siamese Cat")
 
-    owner.add_task_for_pet("Biscuit", "Morning walk", 30, time(8, 0), priority=Priority.HIGH)
-    owner.add_task_for_pet("Whiskers", "Feeding", 15, time(9, 0), priority=Priority.HIGH)
-    owner.add_task_for_pet("Biscuit", "Lunch and playtime", 45, time(12, 30), priority=Priority.MEDIUM)
-    owner.add_task_for_pet("Whiskers", "Litter box cleaning", 10, time(18, 0), priority=Priority.MEDIUM)
+    owner.add_task_for_pet(
+        "Biscuit", "Morning walk", 30, time(8, 0), priority=Priority.HIGH
+    )
+    owner.add_task_for_pet(
+        "Whiskers", "Feeding", 15, time(9, 0), priority=Priority.HIGH
+    )
+    owner.add_task_for_pet(
+        "Biscuit", "Lunch and playtime", 45, time(12, 30), priority=Priority.MEDIUM
+    )
+    owner.add_task_for_pet(
+        "Whiskers", "Litter box cleaning", 10, time(18, 0), priority=Priority.MEDIUM
+    )
 
     biscuit_tasks = owner.get_tasks_for_pet("Biscuit")
     whiskers_tasks = owner.get_tasks_for_pet("Whiskers")
@@ -80,8 +96,12 @@ def test_view_schedule_for_single_pet():
     """Test 1.4: Verify viewing schedule for a specific pet."""
     owner = Owner("Alice", start_time=time(8, 0))
     owner.add_pet("Biscuit", "Golden Retriever")
-    owner.add_task_for_pet("Biscuit", "Morning walk", 30, time(8, 0), priority=Priority.HIGH)
-    owner.add_task_for_pet("Biscuit", "Lunch and playtime", 45, time(12, 30), priority=Priority.MEDIUM)
+    owner.add_task_for_pet(
+        "Biscuit", "Morning walk", 30, time(8, 0), priority=Priority.HIGH
+    )
+    owner.add_task_for_pet(
+        "Biscuit", "Lunch and playtime", 45, time(12, 30), priority=Priority.MEDIUM
+    )
 
     schedule = owner.generate_str_schedule_for_pet("Biscuit")
 
@@ -100,10 +120,18 @@ def test_view_schedule_for_all_pets():
     owner = Owner("Alice", start_time=time(8, 0))
     owner.add_pet("Biscuit", "Golden Retriever")
     owner.add_pet("Whiskers", "Siamese Cat")
-    owner.add_task_for_pet("Biscuit", "Morning walk", 30, time(8, 0), priority=Priority.HIGH)
-    owner.add_task_for_pet("Whiskers", "Feeding", 15, time(9, 0), priority=Priority.HIGH)
-    owner.add_task_for_pet("Biscuit", "Lunch and playtime", 45, time(12, 30), priority=Priority.MEDIUM)
-    owner.add_task_for_pet("Whiskers", "Litter box cleaning", 10, time(18, 0), priority=Priority.MEDIUM)
+    owner.add_task_for_pet(
+        "Biscuit", "Morning walk", 30, time(8, 0), priority=Priority.HIGH
+    )
+    owner.add_task_for_pet(
+        "Whiskers", "Feeding", 15, time(9, 0), priority=Priority.HIGH
+    )
+    owner.add_task_for_pet(
+        "Biscuit", "Lunch and playtime", 45, time(12, 30), priority=Priority.MEDIUM
+    )
+    owner.add_task_for_pet(
+        "Whiskers", "Litter box cleaning", 10, time(18, 0), priority=Priority.MEDIUM
+    )
 
     schedule = owner.generate_str_schedule_for_all_pets()
 
@@ -124,20 +152,31 @@ def test_view_schedule_for_all_pets():
 # PART 2: SORTING CORRECTNESS TESTS
 # ============================================================================
 
+
 def test_tasks_sorted_by_scheduled_time():
     """Test 2.1: Verify tasks are sorted chronologically after scheduling."""
     owner = Owner("Alice", start_time=time(8, 0))
     owner.add_pet("Buddy", "Dog")
 
     # Add tasks in non-chronological order
-    owner.add_task_for_pet("Buddy", "Evening task", 30, time(18, 0), priority=Priority.MEDIUM)
-    owner.add_task_for_pet("Buddy", "Morning task", 30, time(8, 0), priority=Priority.MEDIUM)
-    owner.add_task_for_pet("Buddy", "Afternoon task", 30, time(14, 0), priority=Priority.MEDIUM)
-    owner.add_task_for_pet("Buddy", "Noon task", 30, time(12, 0), priority=Priority.MEDIUM)
+    owner.add_task_for_pet(
+        "Buddy", "Evening task", 30, time(18, 0), priority=Priority.MEDIUM
+    )
+    owner.add_task_for_pet(
+        "Buddy", "Morning task", 30, time(8, 0), priority=Priority.MEDIUM
+    )
+    owner.add_task_for_pet(
+        "Buddy", "Afternoon task", 30, time(14, 0), priority=Priority.MEDIUM
+    )
+    owner.add_task_for_pet(
+        "Buddy", "Noon task", 30, time(12, 0), priority=Priority.MEDIUM
+    )
 
     pet = owner.pets[0]
     tasks_with_pet = [(pet.name, task) for task in pet.tasks]
-    scheduled, _ = Scheduler.create_schedule(tasks_with_pet, time(8, 0), TimeIncrement.HOUR)
+    scheduled, _ = Scheduler.create_schedule(
+        tasks_with_pet, time(8, 0), TimeIncrement.HOUR
+    )
 
     # Verify chronological order (filter out unscheduled tasks)
     scheduled_with_times = [t for t in scheduled if t.scheduled_time is not None]
@@ -154,13 +193,19 @@ def test_unscheduled_tasks_appear_last():
     owner.add_pet("Buddy", "Dog")
 
     # Task 1: too long to fit before due_time (120 min task, due at 09:00)
-    owner.add_task_for_pet("Buddy", "Long task", 120, time(9, 0), priority=Priority.HIGH)
+    owner.add_task_for_pet(
+        "Buddy", "Long task", 120, time(9, 0), priority=Priority.HIGH
+    )
     # Task 2: fits easily (30 min task, due at 12:00)
-    owner.add_task_for_pet("Buddy", "Short task", 30, time(12, 0), priority=Priority.MEDIUM)
+    owner.add_task_for_pet(
+        "Buddy", "Short task", 30, time(12, 0), priority=Priority.MEDIUM
+    )
 
     pet = owner.pets[0]
     tasks_with_pet = [(pet.name, task) for task in pet.tasks]
-    scheduled, skipped_str = Scheduler.create_schedule(tasks_with_pet, time(8, 0), TimeIncrement.HOUR)
+    scheduled, skipped_str = Scheduler.create_schedule(
+        tasks_with_pet, time(8, 0), TimeIncrement.HOUR
+    )
 
     # Verify scheduled list only contains successfully scheduled tasks
     assert len(scheduled) == 1  # Only "Short task" gets scheduled
@@ -185,11 +230,15 @@ def test_sort_by_priority_then_due_time():
     # Task C: HIGH priority, due 12:00 (due earlier than B)
     owner.add_task_for_pet("Buddy", "Task C", 20, time(12, 0), priority=Priority.HIGH)
     # Task D: MEDIUM priority, due 13:30 (plenty of time)
-    owner.add_task_for_pet("Buddy", "Task D", 20, time(13, 30), priority=Priority.MEDIUM)
+    owner.add_task_for_pet(
+        "Buddy", "Task D", 20, time(13, 30), priority=Priority.MEDIUM
+    )
 
     pet = owner.pets[0]
     tasks_with_pet = [(pet.name, task) for task in pet.tasks]
-    scheduled, _ = Scheduler.create_schedule(tasks_with_pet, time(8, 0), TimeIncrement.HOUR)
+    scheduled, _ = Scheduler.create_schedule(
+        tasks_with_pet, time(8, 0), TimeIncrement.HOUR
+    )
 
     # Verify only scheduled tasks in result
     scheduled_tasks = [t for t in scheduled if t.scheduled_time is not None]
@@ -206,13 +255,14 @@ def test_sort_by_priority_then_due_time():
 # PART 3: TASK COMPLETION & FILTERING TESTS
 # ============================================================================
 
+
 def test_task_completion():
     """Test 3.1: Verify that calling mark_complete() changes the task's status."""
     task = Task(
         description="Feed the dog",
         duration=10,
         due_time=time(8, 0),
-        frequency=TimeFrequency.DAILY,
+        recurrence=Recurrence.DAILY,
         priority=Priority.HIGH,
     )
 
@@ -310,19 +360,26 @@ def test_filtering_does_not_modify_original():
 # PART 4: CONFLICT DETECTION TESTS
 # ============================================================================
 
+
 def test_detect_task_cannot_fit_before_due_time():
     """Test 4.1: Verify tasks too long to fit before due_time are skipped."""
     owner = Owner("Alice", start_time=time(8, 0))
     owner.add_pet("Buddy", "Dog")
 
     # Task 1: 120 min task with due time 09:00 (won't fit, needs to complete by 09:00)
-    owner.add_task_for_pet("Buddy", "Long task", 120, time(9, 0), priority=Priority.HIGH)
+    owner.add_task_for_pet(
+        "Buddy", "Long task", 120, time(9, 0), priority=Priority.HIGH
+    )
     # Task 2: 30 min task with due time 11:00 (fits easily)
-    owner.add_task_for_pet("Buddy", "Short task", 30, time(11, 0), priority=Priority.LOW)
+    owner.add_task_for_pet(
+        "Buddy", "Short task", 30, time(11, 0), priority=Priority.LOW
+    )
 
     pet = owner.pets[0]
     tasks_with_pet = [(pet.name, task) for task in pet.tasks]
-    scheduled, skipped_str = Scheduler.create_schedule(tasks_with_pet, time(8, 0), TimeIncrement.HOUR)
+    scheduled, skipped_str = Scheduler.create_schedule(
+        tasks_with_pet, time(8, 0), TimeIncrement.HOUR
+    )
 
     # Scheduled list only contains tasks that were successfully scheduled
     assert len(scheduled) == 1
@@ -344,7 +401,9 @@ def test_detect_overlapping_scheduled_tasks():
 
     pet = owner.pets[0]
     tasks_with_pet = [(pet.name, task) for task in pet.tasks]
-    scheduled, _ = Scheduler.create_schedule(tasks_with_pet, time(8, 0), TimeIncrement.HOUR)
+    scheduled, _ = Scheduler.create_schedule(
+        tasks_with_pet, time(8, 0), TimeIncrement.HOUR
+    )
 
     # Task 1 should be scheduled at 08:00
     task1 = [t for t in scheduled if t.description == "Task 1"][0]
@@ -361,10 +420,18 @@ def test_conflict_detection_across_multiple_pets():
     owner.add_pet("Biscuit", "Dog")
     owner.add_pet("Whiskers", "Cat")
 
-    owner.add_task_for_pet("Biscuit", "Biscuit Task 1", 45, time(9, 0), priority=Priority.HIGH)
-    owner.add_task_for_pet("Biscuit", "Biscuit Task 2", 30, time(10, 0), priority=Priority.MEDIUM)
-    owner.add_task_for_pet("Whiskers", "Whiskers Task 1", 60, time(9, 30), priority=Priority.HIGH)
-    owner.add_task_for_pet("Whiskers", "Whiskers Task 2", 20, time(11, 0), priority=Priority.LOW)
+    owner.add_task_for_pet(
+        "Biscuit", "Biscuit Task 1", 45, time(9, 0), priority=Priority.HIGH
+    )
+    owner.add_task_for_pet(
+        "Biscuit", "Biscuit Task 2", 30, time(10, 0), priority=Priority.MEDIUM
+    )
+    owner.add_task_for_pet(
+        "Whiskers", "Whiskers Task 1", 60, time(9, 30), priority=Priority.HIGH
+    )
+    owner.add_task_for_pet(
+        "Whiskers", "Whiskers Task 2", 20, time(11, 0), priority=Priority.LOW
+    )
 
     scheduled, skipped_str = Scheduler.create_schedule_for_owner(owner)
 
@@ -389,7 +456,9 @@ def test_no_conflicts_with_properly_spaced_tasks():
 
     pet = owner.pets[0]
     tasks_with_pet = [(pet.name, task) for task in pet.tasks]
-    scheduled, skipped_str = Scheduler.create_schedule(tasks_with_pet, time(8, 0), TimeIncrement.HOUR)
+    scheduled, skipped_str = Scheduler.create_schedule(
+        tasks_with_pet, time(8, 0), TimeIncrement.HOUR
+    )
 
     # All tasks should be scheduled
     assert all(t.scheduled_time is not None for t in scheduled)
@@ -403,11 +472,15 @@ def test_skipped_task_report_includes_details():
     owner.add_pet("Buddy", "Dog")
 
     # 90-minute task that can't fit before 09:00 due_time
-    owner.add_task_for_pet("Buddy", "Long appointment", 90, time(9, 0), priority=Priority.MEDIUM)
+    owner.add_task_for_pet(
+        "Buddy", "Long appointment", 90, time(9, 0), priority=Priority.MEDIUM
+    )
 
     pet = owner.pets[0]
     tasks_with_pet = [(pet.name, task) for task in pet.tasks]
-    scheduled, skipped_str = Scheduler.create_schedule(tasks_with_pet, time(8, 0), TimeIncrement.HOUR)
+    scheduled, skipped_str = Scheduler.create_schedule(
+        tasks_with_pet, time(8, 0), TimeIncrement.HOUR
+    )
 
     assert "Skipped due to conflicts:" in skipped_str
     assert "Buddy" in skipped_str

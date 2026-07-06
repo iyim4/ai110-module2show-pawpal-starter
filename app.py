@@ -28,7 +28,7 @@ col1, col2, col3 = st.columns(3)
 with col1:
     owner_name = st.text_input("Your name", value="Jordan")
 with col2:
-    start_time = st.time_input("Schedule", value=datetime.time(8, 0))
+    start_time = st.time_input("Schedule Start Time", value=datetime.time(8, 0))
 with col3:
     frequency = st.selectbox("Task frequency", TIME_INCREMENT_STRINGS.keys())
 

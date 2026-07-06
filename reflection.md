@@ -24,7 +24,7 @@ The three main tasks a user should be able to do is:
 - I also added three utility enum classes to communicate timing-related settings
     - Priority: enum representing task importance
     - TimeIncrement: enum representing Task scheduling blocks
-    - TimeFrequency: enum representing Task frequency
+    - Recurrence: enum representing Task recurrence frequency
 
 ---
 
