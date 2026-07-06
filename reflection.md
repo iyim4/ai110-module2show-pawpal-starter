@@ -44,13 +44,13 @@ The three main tasks a user should be able to do is:
 
 **a. How you used AI**
 
-- How did you use AI tools during this project (for example: design brainstorming, debugging, refactoring)?
-- What kinds of prompts or questions were most helpful?
+- I used Claude AI extensively during this project to brainstorm designs, debug, and refactor. It was very helpful in automating code skeletons and creating rough drafts.
+- Good results came from prompts that included more information with the goal of what I expect and instructions on what to modify. I tried giving the AI a 'role', a strategy covered in class recently. I did not see a noticable positive nor negative impact.
 
 **b. Judgment and verification**
 
-- Describe one moment where you did not accept an AI suggestion as-is.
-- How did you evaluate or verify what the AI suggested?
+- For system design, AI can create a rough outline, but I believe a human should finalize the design. I tried to use AI more than last project, but it went "off the rails" and was overly vague, since it could not keep track of all the requirements. Not to mention, the requirements were split into three files, and did not align with each other.
+- I experienced frustration due using a mostly AI generated design for this project, and will not be using AI to this extent for system design for the foreseeable future. The design was disorganized and not easily modifiable/scalable.
 
 ---
 
@@ -58,13 +58,13 @@ The three main tasks a user should be able to do is:
 
 **a. What you tested**
 
-- What behaviors did you test?
-- Why were these tests important?
+- I tested the basics of adding a pet and task, then the main features of Priority-Based Task Scheduling, Conflict Detection & Smart Skipping, Interactive Multi-Pet Dashboard
+- Tests are important to ensure the system runs as intended. The code is only as good as the tests.
 
 **b. Confidence**
 
-- How confident are you that your scheduler works correctly?
-- What edge cases would you test next if you had more time?
+- I am 4.5/5 confident the scheduler works correctly. I did not have time to thoroughly read all the tests.
+- With more time, I would like to test edgecases involving 3+ pets and out-of-order tasks with mixed completion.
 
 ---
 
@@ -72,12 +72,13 @@ The three main tasks a user should be able to do is:
 
 **a. What went well**
 
-- What part of this project are you most satisfied with?
+- I am most satisfied with the clean streamlit interface and logic branches
 
 **b. What you would improve**
 
-- If you had another iteration, what would you improve or redesign?
+- I would first clarify project goals, then use the clearer focus to completely redesign the system to cater to those goals. The project requirements were vague, and felt like it guided students to a more programmatic over OO design.
 
 **c. Key takeaway**
 
-- What is one important thing you learned about designing systems or working with AI on this project?
+- The most important takeaway I learned on this project was to not trust AI with full project designs. Following instructions to use AI for system design resulting in a glaringly awful and tightly-coupled design. AI will not replace system design any time soon. Clear system goals are just as important - AI becomes overly detail-focused and cannot create clear, cohesive goals across multiple files.
+- tl;dr AI sucks at system design right now. Perhaps I'll try again in 10 years.
