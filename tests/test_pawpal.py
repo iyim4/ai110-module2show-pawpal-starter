@@ -488,3 +488,105 @@ def test_skipped_task_report_includes_details():
     assert "09:00" in skipped_str
     assert "90 min" in skipped_str
     assert "Medium" in skipped_str
+
+
+# ============================================================================
+# PART 5: TASK DISPLAY FORMAT TESTS
+# ============================================================================
+
+
+def test_task_get_str_incomplete():
+    """Test 5.1: Verify get_str() returns correct format for incomplete task."""
+    task = Task(
+        description="Morning walk",
+        duration=30,
+        due_time=time(8, 0),
+        priority=Priority.HIGH,
+        scheduled_time=time(8, 0),
+    )
+
+    result = task.get_str()
+
+    assert "☐" in result  # Incomplete checkbox
+    assert "08:00" in result
+    assert "Morning walk" in result
+    assert "30 min" in result
+    assert "high" in result
+
+
+def test_task_get_str_complete():
+    """Test 5.2: Verify get_str() returns correct format for completed task."""
+    task = Task(
+        description="Evening walk",
+        duration=20,
+        due_time=time(18, 0),
+        priority=Priority.MEDIUM,
+        scheduled_time=time(18, 0),
+        completed=True,
+    )
+
+    result = task.get_str()
+
+    assert "☑" in result  # Completed checkbox
+    assert "18:00" in result
+    assert "Evening walk" in result
+    assert "20 min" in result
+    assert "medium" in result
+
+
+def test_task_get_str_unscheduled():
+    """Test 5.3: Verify get_str() shows 'unscheduled' when scheduled_time is None."""
+    task = Task(
+        description="Feeding",
+        duration=15,
+        due_time=time(12, 0),
+        priority=Priority.LOW,
+        scheduled_time=None,
+    )
+
+    result = task.get_str()
+
+    assert "☐" in result
+    assert "unscheduled" in result
+    assert "Feeding" in result
+    assert "15 min" in result
+    assert "low" in result
+
+
+def test_schedule_uses_get_str_method():
+    """Test 5.4: Verify schedules display tasks using get_str() format."""
+    owner = Owner("Alice", start_time=time(8, 0))
+    owner.add_pet("Buddy", "Dog")
+    owner.add_task_for_pet(
+        "Buddy", "Morning walk", 30, time(9, 0), priority=Priority.HIGH
+    )
+
+    schedule = owner.generate_str_schedule_for_pet("Buddy")
+
+    # Schedule should contain the formatted output from get_str()
+    assert "☐" in schedule or "☑" in schedule  # Checkbox should be present
+    assert "Morning walk" in schedule
+    assert "30 min" in schedule
+    assert "high" in schedule
+
+
+def test_incomplete_schedule_uses_get_str_method():
+    """Test 5.5: Verify incomplete task schedule displays tasks with checkboxes."""
+    owner = Owner("Alice", start_time=time(8, 0))
+    owner.add_pet("Buddy", "Dog")
+    owner.add_task_for_pet(
+        "Buddy", "Task 1", 30, time(8, 0), priority=Priority.HIGH
+    )
+    owner.add_task_for_pet(
+        "Buddy", "Task 2", 30, time(9, 0), priority=Priority.MEDIUM
+    )
+
+    # Mark one task complete
+    owner.pets[0].tasks[0].mark_complete()
+
+    schedule = owner.get_incomplete_schedule_for_pet("Buddy")
+
+    # Should only show Task 2 (incomplete)
+    assert "Task 2" in schedule
+    assert "Task 1" not in schedule
+    assert "☐" in schedule  # Checkbox for incomplete task
