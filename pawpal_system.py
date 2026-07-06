@@ -74,6 +74,17 @@ class Task:
         """Mark this task as completed."""
         self.completed = True
 
+    def get_str(self) -> str:
+        """Return this task as a formatted string with completion checkbox."""
+        checkbox = "☑" if self.completed else "☐"
+        time_str = (
+            self.scheduled_time.strftime("%H:%M")
+            if self.scheduled_time
+            else "unscheduled"
+        )
+        priority_str = self.priority.name.lower()
+        return f"{checkbox} {time_str} — {self.description} ({self.duration} min) [priority: {priority_str}]"
+
 
 @dataclass
 class Pet:
@@ -97,15 +108,7 @@ class Pet:
         """Return this pet's daily task schedule as a string."""
         lines = [f"#### Daily plan for {self.name} ({self.species})"]
         for task in self.tasks:
-            time_str = (
-                task.scheduled_time.strftime("%H:%M")
-                if task.scheduled_time
-                else "unscheduled"
-            )
-            priority_str = task.priority.name.lower()
-            lines.append(
-                f"  - {time_str} — {task.description} ({task.duration} min) [priority: {priority_str}]"
-            )
+            lines.append(f"  - {task.get_str()}")
         return "\n".join(lines)
 
     def get_str_task_list(self) -> str:
@@ -232,15 +235,7 @@ class Owner:
         incomplete_tasks = Scheduler.filter_out_completed(pet)
         lines = [f"#### Active tasks for {pet.name} ({pet.species})"]
         for task in incomplete_tasks:
-            time_str = (
-                task.scheduled_time.strftime("%H:%M")
-                if task.scheduled_time
-                else "unscheduled"
-            )
-            priority_str = task.priority.name.lower()
-            lines.append(
-                f"  - {time_str} — {task.description} ({task.duration} min) [priority: {priority_str}]"
-            )
+            lines.append(f"  - {task.get_str()}")
 
         if not incomplete_tasks:
             lines.append("  (All tasks completed!)")
@@ -266,15 +261,7 @@ class Owner:
 
         lines = [f"#### Daily plan for {pet.name} ({pet.species})"]
         for task in scheduled:
-            time_str = (
-                task.scheduled_time.strftime("%H:%M")
-                if task.scheduled_time
-                else "unscheduled"
-            )
-            priority_str = task.priority.name.lower()
-            lines.append(
-                f"  - {time_str} — {task.description} ({task.duration} min) [priority: {priority_str}]"
-            )
+            lines.append(f"  - {task.get_str()}")
 
         output = "\n".join(lines)
         if skipped:
@@ -294,15 +281,7 @@ class Owner:
             pet_tasks = [task for task in scheduled if task in pet.tasks]
             lines = [f"#### Daily plan for {pet.name} ({pet.species})"]
             for task in pet_tasks:
-                time_str = (
-                    task.scheduled_time.strftime("%H:%M")
-                    if task.scheduled_time
-                    else "unscheduled"
-                )
-                priority_str = task.priority.name.lower()
-                lines.append(
-                    f"  - {time_str} — {task.description} ({task.duration} min) [priority: {priority_str}]"
-                )
+                lines.append(f"  - {task.get_str()}")
             output.append("\n".join(lines))
 
         result = "\n\n".join(output)
