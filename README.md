@@ -64,9 +64,11 @@ Daily plan for Whiskers (Siamese Cat):
 
 ## 🧪 Testing PawPal+
 
+Tests verify the three core user tasks: adding pets, scheduling tasks, and viewing schedules. They validate data integrity through sorting (chronological order, priority-based), filtering (completed tasks), and conflict detection (tasks that can't fit before due times). Coverage spans single and multi-pet scenarios with edge cases for empty states and scheduling constraints.
+
 ```bash
 # Run the full test suite:
-pytest
+python -m pytest tests/test_pawpal.py -v
 
 # Run with coverage:
 pytest --cov
@@ -75,8 +77,36 @@ pytest --cov
 Sample test output:
 
 ```
-# Paste your pytest output here
+================================ test session starts =================================
+platform win32 -- Python 3.13.1, pytest-9.0.3, pluggy-1.6.0 -- C:\Python313\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\isayi\CLASSES\AI110\ai110-module2show-pawpal-starter
+plugins: anyio-4.13.0
+collected 19 items                                                                    
+
+tests/test_pawpal.py::test_add_pet PASSED                                       [  5%]
+tests/test_pawpal.py::test_add_multiple_tasks_to_pet PASSED                     [ 10%]
+tests/test_pawpal.py::test_add_tasks_to_multiple_pets PASSED                    [ 15%]
+tests/test_pawpal.py::test_view_schedule_for_single_pet PASSED                  [ 21%]
+tests/test_pawpal.py::test_view_schedule_for_all_pets PASSED                    [ 26%]
+tests/test_pawpal.py::test_tasks_sorted_by_scheduled_time PASSED                [ 31%]
+tests/test_pawpal.py::test_unscheduled_tasks_appear_last PASSED                 [ 36%]
+tests/test_pawpal.py::test_sort_by_priority_then_due_time PASSED                [ 42%]
+tests/test_pawpal.py::test_task_completion PASSED                               [ 47%]
+tests/test_pawpal.py::test_filter_out_completed_tasks PASSED                    [ 52%]
+tests/test_pawpal.py::test_filter_with_all_tasks_complete PASSED                [ 57%]
+tests/test_pawpal.py::test_filter_with_no_tasks_complete PASSED                 [ 63%]
+tests/test_pawpal.py::test_add_tasks_to_pet PASSED                              [ 68%]
+tests/test_pawpal.py::test_filtering_does_not_modify_original PASSED            [ 73%]
+tests/test_pawpal.py::test_detect_task_cannot_fit_before_due_time PASSED        [ 78%]
+tests/test_pawpal.py::test_detect_overlapping_scheduled_tasks PASSED            [ 84%]
+tests/test_pawpal.py::test_conflict_detection_across_multiple_pets PASSED       [ 89%]
+tests/test_pawpal.py::test_no_conflicts_with_properly_spaced_tasks PASSED       [ 94%]
+tests/test_pawpal.py::test_skipped_task_report_includes_details PASSED          [100%]
+
+================================= 19 passed in 0.06s =================================
 ```
+- Confidence Level 5/5 system reliablity, thorough tests
 
 ## 📐 Smarter Scheduling
 
