@@ -311,6 +311,16 @@ class Scheduler:
         return "\n".join(lines)
 
     @staticmethod
+    def sort_by_time(pet: Pet) -> None:
+        """Sort pet's task list by scheduled_time, with unscheduled tasks last."""
+        pet.tasks.sort(key=lambda task: (task.scheduled_time is None, task.scheduled_time))
+
+    @staticmethod
+    def filter_out_completed(pet: Pet) -> List[Task]:
+        """Return a list of uncompleted tasks for a pet without modifying the original."""
+        return [task for task in pet.tasks if not task.completed]
+
+    @staticmethod
     def create_schedule(
         tasks_with_pet: List[Tuple[str, Task]],
         start_time: time,
