@@ -28,6 +28,7 @@ classDiagram
         -completed: bool
         -scheduled_time: Optional~time~
         +mark_complete() void
+        +get_str() str
     }
 
     class Pet {
@@ -46,9 +47,11 @@ classDiagram
         -time_increment: TimeIncrement
         +add_pet(name, species) tuple~bool, str~
         +remove_pet(name) void
-        +add_task_for_pet(name, description, duration, due_time, frequency, priority) bool
+        +add_task_for_pet(name, description, duration, due_time, recurrence, priority) bool
         +get_tasks_for_pet(name) list~Task~
         +get_str_schedule_for_pet(name) str
+        +get_sorted_schedule_for_pet(name) str
+        +get_incomplete_schedule_for_pet(name) str
         +generate_str_schedule_for_pet(name) str
         +generate_str_schedule_for_all_pets() str
         +get_str_schedule_for_all_pets() str
