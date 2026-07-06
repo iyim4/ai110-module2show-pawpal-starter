@@ -1,15 +1,72 @@
 classDiagram
-    %% Replace the placeholders below with your actual classes, attributes, methods, and relationships.
-    %% Keep this file updated so it matches your final implementation.
-
-    class ClassName {
-        +type attribute
-        +method() returnType
+    class Priority {
+        <<enumeration>>
+        LOW
+        MEDIUM
+        HIGH
     }
 
-    class AnotherClass {
-        +type attribute
-        +method() returnType
+    class TimeIncrement {
+        <<enumeration>>
+        HOUR
+        HALF_HOUR
+        QUARTER_HOUR
     }
 
-    ClassName --> AnotherClass : relationship
+    class Recurrence {
+        <<enumeration>>
+        DAILY
+        WEEKLY
+    }
+
+    class Task {
+        -description: str
+        -duration: int
+        -due_time: time
+        -recurrence: Recurrence
+        -priority: Priority
+        -completed: bool
+        -scheduled_time: Optional~time~
+        +mark_complete() void
+    }
+
+    class Pet {
+        -name: str
+        -species: str
+        -tasks: list~Task~
+        +add_task(description, duration, due_time, recurrence, priority) void
+        +get_str_schedule() str
+        +get_str_task_list() str
+    }
+
+    class Owner {
+        -name: str
+        -pets: list~Pet~
+        -start_time: time
+        -time_increment: TimeIncrement
+        +add_pet(name, species) tuple~bool, str~
+        +remove_pet(name) void
+        +add_task_for_pet(name, description, duration, due_time, frequency, priority) bool
+        +get_tasks_for_pet(name) list~Task~
+        +get_str_schedule_for_pet(name) str
+        +generate_str_schedule_for_pet(name) str
+        +generate_str_schedule_for_all_pets() str
+        +get_str_schedule_for_all_pets() str
+    }
+
+    class Scheduler {
+        <<utility>>
+        +create_schedule(tasks_with_pet, start_time, interval) tuple~list~Task~, str~
+        +create_schedule_for_owner(owner) tuple~list~Task~, str~
+        +sort_by_time(pet) void
+        +filter_out_completed(pet) list~Task~
+    }
+
+    Pet --> Task: contains many
+    Owner --> Pet: contains many
+    Task --> Priority: uses
+    Task --> Recurrence: uses
+    Owner --> TimeIncrement: uses
+    Scheduler --> Owner: schedules for
+    Scheduler --> Task: organizes many
+    Scheduler --> TimeIncrement: uses
