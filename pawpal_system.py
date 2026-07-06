@@ -321,6 +321,11 @@ class Scheduler:
         return [task for task in pet.tasks if not task.completed]
 
     @staticmethod
+    def _task_sort_key(pet_task: Tuple[str, Task]) -> Tuple[int, time]:
+        """Return sort key for tasks: priority (high to low), then due_time (early to late)."""
+        return (-pet_task[1].priority.value, pet_task[1].due_time)
+
+    @staticmethod
     def create_schedule(
         tasks_with_pet: List[Tuple[str, Task]],
         start_time: time,
@@ -329,14 +334,12 @@ class Scheduler:
         """
         Schedule tasks by priority (primary) and due_time (secondary).
         Assigns scheduled_time to each task, skipping those that can't fit before due_time.
+        Note: Modifies task.scheduled_time in-place for scheduled tasks.
         Args:
             tasks_with_pet: List of (pet_name, task) tuples
         Returns (scheduled_tasks, skipped_summary_string).
         """
-        # Sort by priority (high to low) first, then by due_time (earliest first) as tiebreaker
-        sorted_tasks = sorted(
-            tasks_with_pet, key=lambda x: (-x[1].priority.value, x[1].due_time)
-        )
+        sorted_tasks = sorted(tasks_with_pet, key=Scheduler._task_sort_key)
 
         current_slot_time = start_time
         scheduled = []

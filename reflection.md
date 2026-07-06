@@ -32,13 +32,11 @@ The three main tasks a user should be able to do is:
 
 **a. Constraints and priorities**
 
-- What constraints does your scheduler consider (for example: time, priority, preferences)?
-- How did you decide which constraints mattered most?
+- My scheduler considers the constraints for priority and due_time (by when the task should be completed), using priority as a tie breaker. I thought that priority was more important.
 
 **b. Tradeoffs**
 
-- Describe one tradeoff your scheduler makes.
-- Why is that tradeoff reasonable for this scenario?
+- One tradeoff is that during merging pet schedules, tasks with conflicting times may have a task removed from the schedule. It is explained at the end of the schedule, and up to the owner's discretion to organize it themselves. Additionally, if they want to add more tasks, there is the flexibility of changing the task frequency increment to quarter hour, which gives less buffer time but tighter scheduling
 
 ---
 
