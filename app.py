@@ -7,15 +7,6 @@ st.set_page_config(page_title="PawPal+", page_icon="🐾", layout="centered")
 
 st.title("🐾 PawPal+")
 
-# st.markdown("""
-# Welcome to the PawPal+ starter app.
-
-# This file is intentionally thin. It gives you a working Streamlit app so you can start quickly,
-# but **it does not implement the project logic**. Your job is to design the system and build it.
-
-# Use this app as your interactive demo once your backend classes/functions exist.
-# """)
-
 with st.expander("Scenario", expanded=True):
     st.markdown("""
 **PawPal+** is a pet care planning assistant. It helps a pet owner plan care tasks
@@ -23,15 +14,6 @@ for their pet(s) based on constraints like time, priority, and preferences.
 
 You will design and implement the scheduling logic and connect it to this Streamlit UI.
 """)
-
-# with st.expander("What you need to build", expanded=True):
-#     st.markdown("""
-# At minimum, your system should:
-# - Represent pet care tasks (what needs to happen, how long it takes, priority)
-# - Represent the pet and the owner (basic info and preferences)
-# - Build a plan/schedule for a day that chooses and orders tasks based on constraints
-# - Explain the plan (why each task was chosen and when it happens)
-# """)
 
 st.divider()
 
@@ -75,14 +57,17 @@ df_edited = st.data_editor(
 
 # Sync dataframe back to owner.pets
 col1, col2 = st.columns([0.3, 0.7])
+pet_errors = []
+new_pets = []
 with col1:
     if st.button("Save Changes"):
+
         # Build new pet list from edited dataframe
-        new_pets = []
-        for _, row in df_edited.iterrows():
-            name = row["name"].strip()
-            if name:
-                new_pets.append({"name": name, "species": row["species"]})
+        for idx, (_, row) in enumerate(df_edited.iterrows(), 1):
+            name = row["name"] if isinstance(row["name"], str) else ""
+            species = row["species"] if isinstance(row["species"], str) else ""
+
+            new_pets.append({"name": name, "species": species})
 
         # Match by position to detect renames and updates
         for i, new_pet in enumerate(new_pets):
@@ -91,20 +76,29 @@ with col1:
                 owner.pets[i].name = new_pet["name"]
                 owner.pets[i].species = new_pet["species"]
             else:
-                # New pet beyond current list
-                owner.add_pet(new_pet["name"], new_pet["species"])
+                # New pet beyond current list - backend validates
+                success, message = owner.add_pet(new_pet["name"], new_pet["species"])
+                if not success:
+                    pet_errors.append(message)
 
         # Remove pets that were deleted (list is now shorter)
         while len(owner.pets) > len(new_pets):
             owner.pets.pop()
 
-        # Update previous state for next rerun
-        st.session_state.previous_pets_state = new_pets
 with col2:
     if owner.pets:
         st.markdown(f"#### Your Pets: {', '.join([p.name for p in owner.pets])}")
     else:
         st.text("click 'Save Changes' to add your pet(s)")
+
+# Display errors at bottom
+if pet_errors:
+    st.error(f"Error saving Pet(s): {', '.join(pet_errors)}")
+else:
+    # Update previous state for next rerun
+    st.session_state.previous_pets_state = new_pets
+    # st.success("Changes saved!")
+
 
 # tasks. have a section for each pet
 st.markdown("### Tasks")
@@ -140,7 +134,7 @@ for pet in owner.pets:
             st.warning("error adding task!")
 
     if pet.tasks:
-        st.write(f"Current tasks:")
+        st.write(f"Current tasks: {pet.get_str_task_list()}")
     else:
         st.info(f"No tasks for {pet.name} yet. Add one above.")
 
@@ -150,17 +144,20 @@ st.divider()
 col1, col2 = st.columns(2)
 with col1:
     st.subheader("Build Schedule")
-    # st.caption("Get the daily schedule for")
 with col2:
     if owner.pets:
-        pet_name = st.selectbox(
+        pet_name_sch = st.selectbox(
             "Get the daily schedule for:",
             [(f"{p.name} ({p.species})") for p in owner.pets],
         )
     else:
-        st.caption("Add a pet first.")
+        pet_name_sch = None
 
 if st.button("Generate schedule"):
-    schedule = owner.get_str_schedule_for_pet(pet_name)
-    print(schedule)
-    st.markdown(schedule)
+    if pet_name_sch:
+        # Extract just the name (before the parenthesis)
+        pet_name = pet_name_sch.split(" (")[0]
+        schedule = owner.get_str_schedule_for_pet(pet_name)
+        st.markdown(schedule)
+    else:
+        st.error("Please add a pet first.")

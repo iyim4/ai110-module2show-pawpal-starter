@@ -29,13 +29,11 @@ class Priority(Enum):
 
 
 PRIORITY_STRINGS = {
-    # Priority.LOW: "Low",
-    # Priority.MEDIUM: "Medium",
-    # Priority.HIGH: "High",
     "Low": Priority.LOW,
     "Medium": Priority.MEDIUM,
     "High": Priority.HIGH,
 }
+REVERSE_PRIORITY = {v: k for k, v in PRIORITY_STRINGS.items()}
 
 
 class TimeIncrement(Enum):
@@ -81,15 +79,30 @@ class Pet:
         task = Task(description, duration, due_time, frequency, priority)
         self.tasks.append(task)
 
-    def print_schedule(self) -> None:
-        """Print this pet's daily task schedule."""
-        print(f"\nDaily plan for {self.name} ({self.species}):")
+    def get_str_schedule(self) -> str:
+        """Return this pet's daily task schedule as a string."""
+        lines = [f"#### Daily plan for {self.name} ({self.species})"]
         for task in self.tasks:
             time_str = task.due_time.strftime("%H:%M")
             priority_str = task.priority.name.lower()
-            print(
-                f"  {time_str} — {task.description} ({task.duration} min) [priority: {priority_str}]"
+            lines.append(
+                f"  - {time_str} — {task.description} ({task.duration} min) [priority: {priority_str}]"
             )
+        return "\n".join(lines)
+
+    def get_str_task_list(self) -> str:
+        """Return a list of tasks as a string"""
+        if not self.tasks:
+            return "No Tasks added yet"
+
+        strtasks = []
+        for task in self.tasks:
+            pri = REVERSE_PRIORITY.get(task.priority, "Low")
+            strtasks.append(
+                f"{task.description} ({task.duration} mins, {pri} priority)"
+            )
+
+        return ", ".join(strtasks)
 
 
 class Owner:
@@ -105,10 +118,31 @@ class Owner:
         self.start_time: time = start_time
         self.time_increment: TimeIncrement = time_increment
 
-    def add_pet(self, name: str, species: str) -> None:
-        """Create and add a pet to this owner's pet list."""
+    def add_pet(self, name: str, species: str) -> tuple[bool, str]:
+        """Create and add a pet to this owner's pet list. Return (success, message)."""
+        # Validate inputs
+        if not name or not name.strip():
+            return False, "Pet name cannot be empty"
+        if not species or not species.strip():
+            return False, "Species cannot be empty"
+
+        # Clean up whitespace
+        name = name.strip()
+        species = species.strip()
+
+        # Your existing logic
+        for pet in self.pets:
+            if pet.name == name:
+                pet.species = species
+                return True, f"Updated {name} species to {species}"
+
         pet = Pet(name, species)
         self.pets.append(pet)
+        return True, f"Added pet {name} ({species})"
+
+    def remove_pet(self, name: str) -> None:
+        """removes a pet, silently fails if not found"""
+        self.pets = [pet for pet in self.pets if pet.name != name]
 
     def add_task_for_pet(
         self,
@@ -139,27 +173,26 @@ class Owner:
                 return pet.tasks
         return []
 
-    def print_schedule_for_pet(self, name: str) -> None:
-        """Print the daily schedule for a specific pet by name."""
+    def get_str_schedule_for_pet(self, name: str) -> str:
+        """Return the daily schedule for a specific pet by name as a string."""
         pet = None
         for p in self.pets:
+            print("checking pet", p.name)
             if p.name == name:
                 pet = p
                 break
 
         if pet is None:
-            print(f"Pet '{name}' not found.")
-            return
+            return f"Pet '{name}' not found."
 
-        pet.print_schedule()
+        return pet.get_str_schedule()
 
-    def print_schedule_for_all_pets(self) -> None:
-        """Print the daily schedule for all owned pets."""
+    def get_str_schedule_for_all_pets(self) -> str:
+        """Return the daily schedule for all owned pets as a string."""
         if not self.pets:
-            print("No pets found.")
-            return
-        for pet in self.pets:
-            pet.print_schedule()
+            return "No pets found."
+        lines = [pet.get_str_schedule() for pet in self.pets]
+        return "\n".join(lines)
 
 
 class Scheduler:
