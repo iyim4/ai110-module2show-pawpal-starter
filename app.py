@@ -186,9 +186,8 @@ for pet in owner.pets:
             key=f"tasks_{pet.name}",
         )
 
-        col1, col2 = st.columns([0.3, 0.7])
-        with col1:
-            if st.button("Save task changes", key=f"save_{pet.name}"):
+        if st.button("Save task changes", key=f"save_{pet.name}"):
+            try:
                 # Validate task names are not empty
                 errors = []
                 for i, row in enumerate(edited_df):
@@ -199,6 +198,16 @@ for pet in owner.pets:
                 if errors:
                     st.error("\n".join(errors))
                 else:
+                    # Auto-fill defaults for empty cells
+                    for i, row in enumerate(edited_df):
+                        # Auto-fill duration if empty
+                        if not row.get("Duration (min)"):
+                            row["Duration (min)"] = 20
+
+                        # Auto-fill priority if empty
+                        if not row.get("Priority"):
+                            row["Priority"] = "Low"
+
                     # Update existing tasks
                     for i, task in enumerate(pet.tasks[: len(edited_df)]):
                         row = edited_df[i]
@@ -226,6 +235,8 @@ for pet in owner.pets:
                         pet.tasks.pop()
 
                     st.success("Tasks updated!")
+            except Exception as e:
+                st.error("Error saving task(s) due to invalid input")
 
     else:
         st.info(f"No tasks for {pet.name} yet. Add one above.")
