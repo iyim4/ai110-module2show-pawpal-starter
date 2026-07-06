@@ -1,5 +1,5 @@
 from datetime import time
-from pawpal_system import Owner, Priority
+from pawpal_system import Owner, Priority, Scheduler
 
 
 def main():
@@ -60,8 +60,19 @@ def main():
     print(f"\n{'='*50}")
     print(f"Today's Schedule for {alice.name}")
     print(f"{'='*50}")
-    alice.print_schedule_for_all_pets()
+    print(alice.get_str_schedule_for_all_pets())
     print(f"{'='*50}\n")
+
+    # Create scheduler and schedule all tasks
+    scheduled, skipped = Scheduler.create_schedule_for_owner(owner=alice)
+
+    print(f"\n{'='*50}")
+    print("Scheduled Daily Plan")
+    print(f"{'='*50}")
+    print(alice.get_str_schedule_for_all_pets())
+
+    if skipped:
+        print(f"\n{skipped}")
 
 
 if __name__ == "__main__":

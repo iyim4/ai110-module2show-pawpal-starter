@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import datetime
-from pawpal_system import Owner, Priority, PRIORITY_STRINGS
+from pawpal_system import Owner, Priority, PRIORITY_STRINGS, Scheduler
 
 st.set_page_config(page_title="PawPal+", page_icon="🐾", layout="centered")
 
@@ -146,18 +146,22 @@ with col1:
     st.subheader("Build Schedule")
 with col2:
     if owner.pets:
+        options = ["All Pets"] + [(f"{p.name} ({p.species})") for p in owner.pets]
         pet_name_sch = st.selectbox(
             "Get the daily schedule for:",
-            [(f"{p.name} ({p.species})") for p in owner.pets],
+            options,
         )
     else:
         pet_name_sch = None
 
 if st.button("Generate schedule"):
     if pet_name_sch:
-        # Extract just the name (before the parenthesis)
-        pet_name = pet_name_sch.split(" (")[0]
-        schedule = owner.get_str_schedule_for_pet(pet_name)
+        if pet_name_sch == "All Pets":
+            schedule = owner.generate_str_schedule_for_all_pets()
+        else:
+            # Extract just the name (before the parenthesis)
+            pet_name = pet_name_sch.split(" (")[0]
+            schedule = owner.generate_str_schedule_for_pet(pet_name)
         st.markdown(schedule)
     else:
         st.error("Please add a pet first.")

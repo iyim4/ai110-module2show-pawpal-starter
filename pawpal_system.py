@@ -17,9 +17,9 @@ Classes:
 """
 
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Optional, Tuple
 from enum import Enum, auto
-from datetime import time
+from datetime import time, timedelta, datetime
 
 
 class Priority(Enum):
@@ -55,6 +55,7 @@ class Task:
     frequency: TimeFrequency = TimeFrequency.DAILY
     priority: Priority = Priority.LOW
     completed: bool = False
+    scheduled_time: Optional[time] = None
 
     def mark_complete(self) -> None:
         """Mark this task as completed."""
@@ -83,7 +84,11 @@ class Pet:
         """Return this pet's daily task schedule as a string."""
         lines = [f"#### Daily plan for {self.name} ({self.species})"]
         for task in self.tasks:
-            time_str = task.due_time.strftime("%H:%M")
+            time_str = (
+                task.scheduled_time.strftime("%H:%M")
+                if task.scheduled_time
+                else "unscheduled"
+            )
             priority_str = task.priority.name.lower()
             lines.append(
                 f"  - {time_str} — {task.description} ({task.duration} min) [priority: {priority_str}]"
@@ -187,6 +192,68 @@ class Owner:
 
         return pet.get_str_schedule()
 
+    def generate_str_schedule_for_pet(self, name: str) -> str:
+        """Generate and return the daily schedule for a specific pet by name."""
+        pet = None
+        for p in self.pets:
+            if p.name == name:
+                pet = p
+                break
+
+        if pet is None:
+            return f"Pet '{name}' not found."
+
+        scheduler = Scheduler()
+        scheduled, skipped = scheduler.create_schedule(
+            pet.tasks, self.start_time, self.time_increment
+        )
+
+        lines = [f"#### Daily plan for {pet.name} ({pet.species})"]
+        for task in scheduled:
+            time_str = (
+                task.scheduled_time.strftime("%H:%M")
+                if task.scheduled_time
+                else "unscheduled"
+            )
+            priority_str = task.priority.name.lower()
+            lines.append(
+                f"  - {time_str} — {task.description} ({task.duration} min) [priority: {priority_str}]"
+            )
+
+        output = "\n".join(lines)
+        if skipped:
+            output += f"\n\n{skipped}"
+        return output
+
+    def generate_str_schedule_for_all_pets(self) -> str:
+        """Generate and return the daily schedule for all pets."""
+        if not self.pets:
+            return "No pets found."
+
+        scheduler = Scheduler()
+        scheduled, skipped = scheduler.create_schedule_for_owner(self)
+
+        output = []
+        for pet in self.pets:
+            pet_tasks = [task for task in scheduled if task in pet.tasks]
+            lines = [f"#### Daily plan for {pet.name} ({pet.species})"]
+            for task in pet_tasks:
+                time_str = (
+                    task.scheduled_time.strftime("%H:%M")
+                    if task.scheduled_time
+                    else "unscheduled"
+                )
+                priority_str = task.priority.name.lower()
+                lines.append(
+                    f"  - {time_str} — {task.description} ({task.duration} min) [priority: {priority_str}]"
+                )
+            output.append("\n".join(lines))
+
+        result = "\n\n".join(output)
+        if skipped:
+            result += f"\n\n{skipped}"
+        return result
+
     def get_str_schedule_for_all_pets(self) -> str:
         """Return the daily schedule for all owned pets as a string."""
         if not self.pets:
@@ -196,18 +263,81 @@ class Owner:
 
 
 class Scheduler:
-    def create_schedule(self, tasks: List[Task]) -> List[Task]:
-        """Return tasks sorted by priority (high to low)."""
-        # sort by high to low priority
-        return sorted(tasks, key=lambda task: task.priority.value, reverse=True)
+    @staticmethod
+    def _add_time_minutes(base_time: time, minutes: int) -> time:
+        """Add minutes to a time object and return the result."""
+        combined = datetime.combine(datetime.today(), base_time)
+        result = combined + timedelta(minutes=minutes)
+        return result.time()
 
-    def create_schedule_for_owner(self, owner: Owner) -> List[Task]:
-        """Create an ordered schedule for all tasks across an owner's pets (not yet implemented)."""
-        # all_tasks = []
-        # for pet in owner.pets:
-        #     all_tasks.extend(pet.tasks)
-        # return self.create_schedule(all_tasks)
+    @staticmethod
+    def _round_up_to_increment(base_time: time, increment: TimeIncrement) -> time:
+        """Round up a time to the next increment boundary."""
+        increment_minutes = {
+            TimeIncrement.QUARTER_HOUR: 15,
+            TimeIncrement.HALF_HOUR: 30,
+            TimeIncrement.HOUR: 60,
+        }
+        minutes = increment_minutes[increment]
+        total_minutes = base_time.hour * 60 + base_time.minute
+        if total_minutes % minutes == 0:
+            return base_time
+        next_slot = ((total_minutes // minutes) + 1) * minutes
+        hours = next_slot // 60
+        mins = next_slot % 60
+        return time(hour=hours, minute=mins)
 
-        # No, this won't work since we don't know what pet's task to do. must attach pet name to each task.
+    @staticmethod
+    def _format_skipped_tasks(skipped: List[Task]) -> str:
+        """Return a formatted string of skipped tasks."""
+        if not skipped:
+            return ""
+        lines = ["Skipped due to conflicts:"]
+        for task in skipped:
+            due_str = task.due_time.strftime("%H:%M")
+            lines.append(
+                f"  - {task.description} (due: {due_str}, duration: {task.duration} min)"
+            )
+        return "\n".join(lines)
 
-        return []
+    @staticmethod
+    def create_schedule(
+        tasks: List[Task], start_time: time, interval: TimeIncrement
+    ) -> Tuple[List[Task], str]:
+        """
+        Schedule tasks by priority (primary) and due_time (secondary).
+        Assigns scheduled_time to each task, skipping those that can't fit before due_time.
+        Returns (scheduled_tasks, skipped_summary_string).
+        """
+        # Sort by priority (high to low) first, then by due_time (earliest first) as tiebreaker
+        sorted_tasks = sorted(tasks, key=lambda t: (-t.priority.value, t.due_time))
+
+        current_slot_time = start_time
+        scheduled = []
+        skipped = []
+
+        for task in sorted_tasks:
+            # Calculate when task would end if scheduled at current slot
+            end_time = Scheduler._add_time_minutes(current_slot_time, task.duration)
+
+            # Check if task fits before its due_time
+            if end_time > task.due_time:
+                skipped.append(task)
+            else:
+                task.scheduled_time = current_slot_time
+                scheduled.append(task)
+                # Move to next slot, rounding up to the increment boundary
+                current_slot_time = Scheduler._round_up_to_increment(end_time, interval)
+
+        skipped_str = Scheduler._format_skipped_tasks(skipped)
+        return scheduled, skipped_str
+
+    @staticmethod
+    def create_schedule_for_owner(owner: Owner) -> Tuple[List[Task], str]:
+        """Create an ordered schedule for all tasks across an owner's pets."""
+        all_tasks = []
+        for pet in owner.pets:
+            all_tasks.extend(pet.tasks)
+        return Scheduler.create_schedule(
+            all_tasks, owner.start_time, owner.time_increment
+        )
