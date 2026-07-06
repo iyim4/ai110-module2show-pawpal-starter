@@ -81,4 +81,4 @@ The three main tasks a user should be able to do is:
 **c. Key takeaway**
 
 - The most important takeaway I learned on this project was to not trust AI with full project designs. Following instructions to use AI for system design resulting in a glaringly awful and tightly-coupled design. AI will not replace system design any time soon. Clear system goals are just as important - AI becomes overly detail-focused and cannot create clear, cohesive goals across multiple files.
-- tl;dr AI sucks at system design right now. Perhaps I'll try again in 10 years.
+- tl;dr AI sucks at system design right now. I'm glad I had the no-impact opportunity to experiement with AI, but perhaps I'll try again in 10 years.
