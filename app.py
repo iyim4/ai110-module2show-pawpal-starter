@@ -1,7 +1,13 @@
 import streamlit as st
 import pandas as pd
 import datetime
-from pawpal_system import Owner, Priority, PRIORITY_STRINGS, Scheduler
+from pawpal_system import (
+    Owner,
+    Priority,
+    PRIORITY_STRINGS,
+    Scheduler,
+    TIME_INCREMENT_STRINGS,
+)
 
 st.set_page_config(page_title="PawPal+", page_icon="🐾", layout="centered")
 
@@ -18,17 +24,26 @@ You will design and implement the scheduling logic and connect it to this Stream
 st.divider()
 
 # owner
-col1, col2 = st.columns(2)
+col1, col2, col3 = st.columns(3)
 with col1:
     owner_name = st.text_input("Your name", value="Jordan")
 with col2:
-    start_time = st.time_input(
-        "What time do you want the schedule to start?", value=datetime.time(8, 0)
-    )
+    start_time = st.time_input("Schedule", value=datetime.time(8, 0))
+with col3:
+    frequency = st.selectbox("Task frequency", TIME_INCREMENT_STRINGS.keys())
 
 if "owner" not in st.session_state:
-    st.session_state.owner = Owner(name=owner_name)
+    st.session_state.owner = Owner(
+        name=owner_name,
+        start_time=start_time,
+        time_increment=TIME_INCREMENT_STRINGS[frequency],
+    )
+
+# Update existing owner with current input values
 owner = st.session_state.owner
+owner.name = owner_name
+owner.start_time = start_time
+owner.time_increment = TIME_INCREMENT_STRINGS[frequency]
 
 # pets
 st.markdown("### Pets")
@@ -108,7 +123,7 @@ if not owner.pets:
 for pet in owner.pets:
     st.markdown(f"#### {pet.name} Tasks")
 
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4 = st.columns(4)
     with col1:
         task_desc = st.text_input(
             "Task description", value="Morning walk", key=f"task_desc_{pet.name}"
@@ -125,10 +140,20 @@ for pet in owner.pets:
         priority = st.selectbox(
             "Priority", PRIORITY_STRINGS.keys(), index=2, key=f"priority_{pet.name}"
         )
+    with col4:
+        due_time = st.time_input(
+            "Latest end time",
+            value=datetime.time(18, 0),
+            key=f"due_time_{pet.name}",
+        )
 
     if st.button("Add task", key=f"add_task_{pet.name}"):
         success = st.session_state.owner.add_task_for_pet(
-            pet.name, task_desc, duration, priority=PRIORITY_STRINGS[priority]
+            pet.name,
+            task_desc,
+            duration,
+            due_time=due_time,
+            priority=PRIORITY_STRINGS[priority],
         )
         if not success:
             st.warning("error adding task!")
